@@ -47,7 +47,22 @@ export class AnimalArea{
     // Métodos personalizados
 
     spaceUsed(){
-        return this.#occupantAnimals.reduce((currentSize, totalSize) => currentSize + totalSize.size, 0);
+        var spaceUsed = this.#occupantAnimals.reduce((currentSize, totalSize) => currentSize + totalSize.size, 0);
+        var prevAnimal = null;
+
+        // Verifica se há outro tipo de espécie de animal para incrementar +1;
+        for(let i = 0; i < this.#occupantAnimals.length; i++){
+            let actualAnimal = this.#occupantAnimals[i].species;
+
+            if (prevAnimal != null){
+                if (prevAnimal != actualAnimal){
+                    spaceUsed = spaceUsed + 1;
+                    break;
+                }
+            }
+            prevAnimal = this.#occupantAnimals[i].species;
+        }
+        return spaceUsed;
     }
     
     verifyAvaibleSpace() {
