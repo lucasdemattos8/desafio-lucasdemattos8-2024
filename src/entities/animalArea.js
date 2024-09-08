@@ -14,30 +14,10 @@ export class AnimalArea{
     #size;
     #occupantAnimals;
     
-    // Getters e Setters
-
-    get id(){
-        return this.#id;
-    }
-
-    set id(id){
-        this.#id = id;
-    }
+    // Getters necessários
 
     get biome(){
         return this.#biome;
-    }
-
-    set biome(biome){
-        this.#biome = biome;
-    }
-
-    get size(){
-        return this.#size;
-    }
-
-    set size(size){
-        this.#size = size;
     }
 
     get occupantAnimals(){
@@ -46,9 +26,14 @@ export class AnimalArea{
 
     // Métodos personalizados
 
+    /**
+     * Este método tem como objetivo verificar o espaço utilizado pelos animais ocupantes do recinto
+     * levando em consideração o bônus de +1, se houver diferentes de espécies.
+     * @return retorna um valor inteiro representando o espaço OCUPADO no recinto
+    */
     spaceUsed(){
-        var spaceUsed = this.#occupantAnimals.reduce((currentSize, totalSize) => currentSize + totalSize.size, 0);
-        var prevAnimal = null;
+        let spaceUsed = this.#occupantAnimals.reduce((currentSize, totalSize) => currentSize + totalSize.size, 0);
+        let prevAnimal = null;
 
         // Verifica se há outro tipo de espécie de animal para incrementar +1;
         for(let i = 0; i < this.#occupantAnimals.length; i++){
@@ -65,15 +50,19 @@ export class AnimalArea{
         return spaceUsed;
     }
     
+    /**
+     * Este método tem como objetivo verificar o atual espaço disponivel no recinto
+     * @return retorna um valor inteiro representando o espaço LIVRE
+    */
     verifyAvaibleSpace() {
-        var spaceUsed = this.spaceUsed();
+        let spaceUsed = this.spaceUsed();
         return this.#size - spaceUsed;
     }
-  
-    toString(){
-        return `Recinto ID: ${this.#id}, Bioma: ${this.#biome}, Tamanho: ${this.#size}, Animais: ${this.#occupantAnimals.join(', ')}\n`;
-    }
 
+    /**
+     * Este método tem como objetivo criar a representação em STRING do objeto de recinto
+     * @return retorna uma STRING com informações do recinto
+    */
     info(){
         return `Recinto ${this.#id} (espaço livre: ${this.verifyAvaibleSpace()} total: ${this.#size})`
     }

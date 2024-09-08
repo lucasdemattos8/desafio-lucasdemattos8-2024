@@ -1,6 +1,13 @@
 import { AnimalArea } from "./entities/animalArea.js";
 import { Animal } from "./entities/animal.js"; 
 
+/*
+Este código foi desenvolvido durante um desafio técnico para a DB-Tecnologia. Foi extremamente divertido trabalhar neste desafio.
+
+OBS: O teste aponta algumas linhas como "Uncovered" no código. Essas linhas são importantes porque previnem possíveis condições de disponibilidade de recintos, mas dependem dos dados dos Recintos (OBJ: AnimalAreas) e dos Animais (OBJ: Animals).
+
+- Desenvolvido por: Lucas de Mattos Miranda, 08/09/2024
+*/
 
 class RecintosZoo {
      constructor(){
@@ -35,6 +42,11 @@ class RecintosZoo {
             return animalObject;
         }
 
+        // Verifica se o valor obtido é númerico;
+        if(typeof quantidade !== 'number'){
+            return {erro : "A quantidade fornecida deve ser um Número"}
+        }
+
         // Verifica se o valor obtido na quantidade é válido;
         if(quantidade <= 0){
             return {erro : "Quantidade inválida"};
@@ -42,10 +54,10 @@ class RecintosZoo {
 
 
         // (ForEach) Verifica se o animal selecionado é compativel em algum bioma e insere no array "possibleHabitats";
-        var possibleHabitats = [];
+        let possibleHabitats = [];
         this.#animalAreas.forEach((animalArea) => {
             if (animalArea.biome.some(biome => animalObject.biome.includes(biome))){
-                var avaibleSpace = animalArea.verifyAvaibleSpace();
+                let avaibleSpace = animalArea.verifyAvaibleSpace();
                 const expectedUsage = animalObject.size * quantidade;
 
                 avaibleSpace = avaibleSpace - expectedUsage;
@@ -54,7 +66,7 @@ class RecintosZoo {
                 if (this.verifyAnimalConditionals(animalObject, animalArea, quantidade)){
                     // Verificação para condição de espaço necessário;
                     if (avaibleSpace >= 0){
-                        animalArea = this.joinAnimalIntoTheArea(animalArea, animalObject, quantidade);
+                        animalArea = this.addAnimalToArea(animalArea, animalObject, quantidade);
                         // Verificação para garantir o espaço necessário mesmo com bônus de espaço para especies diferentes;
                         if (animalArea.verifyAvaibleSpace() >= 0){
                             possibleHabitats.push(animalArea);
@@ -65,7 +77,7 @@ class RecintosZoo {
         });
         animalObject.recintosViaveis = possibleHabitats.map((habitatInfo => habitatInfo.info()));
         if (animalObject.recintosViaveis.length === 0){
-            return { erro: "Não há recinto viável", recintosViaveis: null};
+            return { erro: "Não há recinto viável" };
         }
         else{
             return animalObject;
@@ -78,10 +90,15 @@ class RecintosZoo {
      * Este método tem como objetivo validar e converter a STRING de nome passada no parametro para OBJETO dos animais listados
      * no construtor da classe "RecintosZoo", caso ele não encontre retorna um erro: "Animal inválido".
      * @param specie STRING de animal a ser validado/convertido;
-     * @return retorna um Object(Animal) 
+     * @return Animal - retorna um Object(Animal) 
     */
     validateAnimal(specie){
-        const animalExists = this.#speciesList.find(animal => animal.species === String(specie).toUpperCase());
+        // Verificação para o tipo informado
+        if(typeof specie !== 'string'){
+            return { erro: "A espécie fornecida deve ser uma String"}
+        }
+        specie = specie.toUpperCase();
+        const animalExists = this.#speciesList.find(animal => animal.species === specie);
         if (animalExists){
             return animalExists;
         } 
@@ -98,8 +115,8 @@ class RecintosZoo {
      * @param quantidade Quantidade de animais a serem adicionados
      * @return animalArea Retorna o mesmo recinto, porém com os objetos informados adicionados com base na quantidade informada.
     */
-    joinAnimalIntoTheArea(animalArea, animalObject, quantidade){
-        for (var i = 0; i < quantidade; i++){
+    addAnimalToArea(animalArea, animalObject, quantidade){
+        for (let i = 0; i < quantidade; i++){
             animalArea.occupantAnimals.push(animalObject);
         }
         return animalArea;
@@ -127,6 +144,11 @@ class RecintosZoo {
                         return false;
                     }
                 }
+                // Verifica se HÁ a existência de um animal pacifico no vetor
+                if(animals.length != 0 && !findCarnivoreAnimal){
+                    return false;
+                }
+
                 return true;
             case ("MACACO"):
                 // Verifica se há algum outro animal presente no recinto, e que ele seja obrigatoriamente pacifico;
