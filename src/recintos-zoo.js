@@ -258,7 +258,7 @@ class RecintosZoo {
     // Métodos para TESTES
 
     /**
-     * Este método tem como objetivo adicionar um novo recinto no objeto vetor do objeto "RecintosZoo" a caracter de TESTES
+     * Este método tem como objetivo adicionar um novo recinto no vetor de recintos do objeto "RecintosZoo" a caracter de TESTES
      * de algumas condições que podem não ser alcançadas com os dados atuais fornecidos
      * @param id INT id do bioma
      * @param biomes Array[String] representação dos biomas presentes no recinto
