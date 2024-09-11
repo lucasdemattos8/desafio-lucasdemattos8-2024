@@ -2,9 +2,14 @@ import { AnimalArea } from "./entities/animalArea.js";
 import { Animal } from "./entities/animal.js"; 
 
 /*
-Este código foi desenvolvido durante um desafio técnico para a DB-Tecnologia. Foi extremamente divertido trabalhar neste desafio.
+Este código foi desenvolvido durante um desafio técnico para a DB-Tecnologia. Foi extremamente divertido trabalhar nesse desafio,
+que envolveu a criação e gerenciamento de recintos para animais com base em critérios específicos. Ao longo do processo, consegui
+aplicar conceitos de Programação Orientada a Objetos (POO), funções de ordem superior em arrays e encapsulamento.
 
-OBS: O teste aponta algumas linhas como "Uncovered" no código. Essas linhas são importantes porque previnem possíveis condições de disponibilidade de recintos, mas dependem dos dados dos Recintos (OBJ: AnimalAreas) e dos Animais (OBJ: Animals).
+Além disso, tive a oportunidade de enfrentar e superar desafios técnicos, aprimorando minhas habilidades em desenvolvimento (JS)
+e testando minha capacidade de resolver problemas complexos.
+
+O desafio proporcionou um aprendizado valioso e uma experiência muito bacana!.
 
 - Desenvolvido por: Lucas de Mattos Miranda, 08/09/2024
 */
