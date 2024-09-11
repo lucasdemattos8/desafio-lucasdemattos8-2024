@@ -10,7 +10,7 @@ OBS: O teste aponta algumas linhas como "Uncovered" no código. Essas linhas sã
 */
 
 class RecintosZoo {
-     constructor(){
+    constructor(){
         // Injeção de dados no construtor
         const leao = new Animal("LEAO", 3, ["savana"]);
         const leopardo = new Animal("LEOPARDO", 2, ["savana"]);
@@ -27,10 +27,10 @@ class RecintosZoo {
         animalAreas.push(new AnimalArea(4, ["rio"], 8, []));
         animalAreas.push(new AnimalArea(5, ["savana"], 9, [leao]));
         this.#animalAreas = animalAreas;
-     }
+    }
 
-     #speciesList;
-     #animalAreas;
+    #speciesList;
+    #animalAreas;   
 
     // Método principal
     analisaRecintos(animal, quantidade) {
@@ -200,10 +200,6 @@ class RecintosZoo {
                 return false;
             }
         }
-        // Verifica se HÁ a existência de um animal pacifico no vetor
-        if(animals.length != 0 && !findCarnivoreAnimal){
-            return false;
-        }
         return true;
     }
 
@@ -257,7 +253,23 @@ class RecintosZoo {
         if(animals.length > 0){
             return false;
         }
-        return false;
+    }
+
+    // Métodos para TESTES
+
+    /**
+     * Este método tem como objetivo adicionar um novo recinto no objeto vetor do objeto "RecintosZoo" a caracter de TESTES
+     * de algumas condições que podem não ser alcançadas com os dados atuais fornecidos
+     * @param id INT id do bioma
+     * @param biomes Array[String] representação dos biomas presentes no recinto
+     * @param capacity INT capacidade em inteiro do recinto
+     * @param animals Array[Animals] vetor com objetos de animais, caso houver algum animal
+     * @return this; - Retorna o próprio objeto da classe RecintosZoo
+    */
+    addTestAnimalArea(id, biomes, capacity, animals) {
+        const newAnimalArea = new AnimalArea(id, biomes, capacity, animals);
+        this.#animalAreas.push(newAnimalArea);
+        return this;
     }
 }
 
