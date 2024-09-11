@@ -34,48 +34,20 @@ class RecintosZoo {
 
     // Método principal
     analisaRecintos(animal, quantidade) {
-        // Verifica se o animal enviado pelo parametro é válido;
-        const animalObject = this.validateAnimal(animal);
+        
+        const animalObject = this.validateValues(animal, quantidade);
 
-        // Verificar se obteve um erro na validação do objeto;
-        if(animalObject.erro){
-            return animalObject;
+        if (animalObject.erro){
+            return { erro: animalObject.erro };
         }
 
-        // Verifica se o valor obtido é númerico;
-        if(typeof quantidade !== 'number'){
-            return {erro : "A quantidade fornecida deve ser um Número"}
-        }
-
-        // Verifica se o valor obtido na quantidade é válido;
-        if(quantidade <= 0){
-            return {erro : "Quantidade inválida"};
-        }
-
-
+        let compatibleAreas = [];
         // (ForEach) Verifica se o animal selecionado é compativel em algum bioma e insere no array "possibleHabitats";
-        let possibleHabitats = [];
         this.#animalAreas.forEach((animalArea) => {
-            if (animalArea.biome.some(biome => animalObject.biome.includes(biome))){
-                let avaibleSpace = animalArea.verifyAvaibleSpace();
-                const expectedUsage = animalObject.size * quantidade;
-
-                avaibleSpace = avaibleSpace - expectedUsage;
-                
-                // Verificação para condições específicas dos animais;
-                if (this.verifyAnimalConditionals(animalObject, animalArea, quantidade)){
-                    // Verificação para condição de espaço necessário;
-                    if (avaibleSpace >= 0){
-                        animalArea = this.addAnimalToArea(animalArea, animalObject, quantidade);
-                        // Verificação para garantir o espaço necessário mesmo com bônus de espaço para especies diferentes;
-                        if (animalArea.verifyAvaibleSpace() >= 0){
-                            possibleHabitats.push(animalArea);
-                        }
-                    }
-                }
-            }
+            compatibleAreas = this.findCompatibleAreas(animalArea, animalObject, quantidade, compatibleAreas);
         });
-        animalObject.recintosViaveis = possibleHabitats.map((habitatInfo => habitatInfo.info()));
+
+        animalObject.recintosViaveis = compatibleAreas.map((habitatInfo => habitatInfo.info()));
         if (animalObject.recintosViaveis.length === 0){
             return { erro: "Não há recinto viável" };
         }
@@ -85,6 +57,65 @@ class RecintosZoo {
     }
 
     // Métodos auxiliares
+
+    /**
+     * Função encarregada com a lógica de fornecer uma lista de recintos compativeis
+     * com o animal passado pelo parametro de "animalObject"
+     * @param animalArea STRING de animal a ser validado/convertido;
+     * @param animalObject OBJECT da classe do tipo Animal a ser validado
+     * @param quantity INT de quantidade de animais
+     * @param possibleHabitats ARRAY encarregado de armazenar os recintos possiveis
+     * @return possibleHabitats - retorna um array com os recintos possíveis
+    */
+    findCompatibleAreas(animalArea, animalObject, quantity, compatibleAreas){        
+        if (animalArea.biome.some(biome => animalObject.biome.includes(biome))){
+            let availableSpace = animalArea.verifyAvaibleSpace();
+            const expectedUsage = animalObject.size * quantity;
+
+            availableSpace = availableSpace - expectedUsage;
+            
+            // Verificação para condições específicas dos animais;
+            if (this.verifyAnimalConditionals(animalObject, animalArea, quantity)){
+                // Verificação para condição de espaço necessário;
+                if (availableSpace >= 0){
+                    animalArea = this.addAnimalToArea(animalArea, animalObject, quantity);
+                    // Verificação para garantir o espaço necessário mesmo com bônus de espaço para especies diferentes;
+                    if (animalArea.verifyAvaibleSpace() >= 0){
+                        compatibleAreas.push(animalArea);
+                    }
+                }
+            }
+        }
+        return compatibleAreas;
+    }
+
+    /**
+     * Verifica se os valores informados realmente são os valores esperados.
+     * @param specie STRING de animal a ser validado/convertido;
+     * @param quantity int de quantidade de animais
+     * @return Animal - retorna um Object(Animal) 
+    */
+    validateValues(specie, quantity){
+        // Verifica se o animal enviado pelo parametro é válido;
+        const animalObject = this.validateAnimal(specie);
+
+        // Verificar se obteve um erro na validação do objeto;
+        if(animalObject.erro){
+            return { erro: animalObject.erro };
+        }
+
+        // Verifica se o valor obtido é númerico;
+        if(typeof quantity !== 'number'){
+            return {erro : "A quantidade fornecida deve ser um Número"}
+        }
+
+        // Verifica se o valor obtido na quantidade é válido;
+        if(quantity <= 0){
+            return {erro : "Quantidade inválida"};
+        }
+        return animalObject;
+    }
+    
 
     /**
      * Este método tem como objetivo validar e converter a STRING de nome passada no parametro para OBJETO dos animais listados
@@ -126,10 +157,12 @@ class RecintosZoo {
      * Este método tem como objetivo verificar as condições de cada individualidade dos animais, o retorno LÓGICO (bool)
      * da função tem como base o status da condição do objeto referido
      * @param animalObject Espécie de animal (objeto) a verificar as condições
+     * @param animalArea Recinto de animais para receber novos animais (objetos)
+     * @param quantidade Quantidade de animais a serem adicionados
      * @return boolean Retorna verdadeiro caso a individualidade do animal seja satisfeita, caso contrário falso.
     */
     verifyAnimalConditionals(animalObject, animalArea, quantidade){
-        let carnivoreAnimals = ["LEAO", "LEOPARDO", "CROCODILO"];
+        const carnivoreAnimals = ["LEAO", "LEOPARDO", "CROCODILO"];
         let animals = animalArea.occupantAnimals;
         let findCarnivoreAnimal = carnivoreAnimals.some(
             animalCarnivore => animalArea.occupantAnimals.find(animal => animal.species === animalCarnivore));
@@ -138,51 +171,11 @@ class RecintosZoo {
             case ("LEAO"):
             case ("LEOPARDO"):
             case ("CROCODILO"):
-                // Verifica a ocorrencia de animais carnivoros DIFERENTES em seus recintos
-                for(let i = 0; i < animals.length; i++){
-                    if (animals[i] != animalObject){
-                        return false;
-                    }
-                }
-                // Verifica se HÁ a existência de um animal pacifico no vetor
-                if(animals.length != 0 && !findCarnivoreAnimal){
-                    return false;
-                }
-
-                return true;
+                return this.verifyCarnivoreConditionals(animalObject, animals, findCarnivoreAnimal);
             case ("MACACO"):
-                // Verifica se há algum outro animal presente no recinto, e que ele seja obrigatoriamente pacifico;
-                if(findCarnivoreAnimal){
-                    return false;
-                }
-                // Verifica se ele não vai ser inserido com algum(ns) companheiro(s);
-                if(quantidade >= 2){
-                    return true;
-                }
-                // Verifica se NÃO há a presença de outros animais;
-                if(animals.length === 0){
-                    return false;
-                }
-                return true;
+                return this.verifyMonkeyConditionals(findCarnivoreAnimal, animals, quantidade);
             case ("HIPOPOTAMO"):
-                let hipopotamoSafeBiome = ["savana", "rio"];
-                // Verifica se há algum outro animal presente no recinto, e que ele seja obrigatoriamente pacifico;
-                if(findCarnivoreAnimal){
-                    return false;
-                }
-                // Verifica se o bioma do recinto é compativel com os "safe Biomes" do hipopotamo;
-                let doesBiomesHaveTheSameSize = animalArea.biome.length === hipopotamoSafeBiome.length;
-                
-                if(doesBiomesHaveTheSameSize && animalArea.biome.every(biome => hipopotamoSafeBiome.includes(biome))){
-                    return true;
-                }
-                if(animals.length === 0){
-                    return true;
-                }
-                if(animals.length > 0){
-                    return false;
-                }
-                return false;
+                return this.verifyHippoConditionals(animals, animalArea, findCarnivoreAnimal);
             default:
                 // Caso encontre uma ocorrência de animal carnivoro em um recinto retorna false, ou seja, um recinto inválido para animais pacificos;
                 if (findCarnivoreAnimal){
@@ -190,6 +183,81 @@ class RecintosZoo {
                 }
                 return true;
         }
+    }
+
+    /**
+     * Este método tem como objetivo verificar as condições de ANIMAIS CARNIVOROS, o retorno LÓGICO (bool)
+     * da função tem como base o status da condição do objeto referido
+     * @param animalObject Espécie de animal (objeto) a verificar as condições
+     * @param animals Array dos animais presentes no recinto a ser verificado
+     * @param findCarnivoreAnimal Boolean baseado na presença de um animal carnivoro no recinto
+     * @return boolean Retorna verdadeiro caso a individualidade do animal seja satisfeita, caso contrário falso.
+    */
+    verifyCarnivoreConditionals(animalObject, animals, findCarnivoreAnimal){
+        // Verifica a ocorrencia de animais carnivoros DIFERENTES em seus recintos
+        for(let i = 0; i < animals.length; i++){
+            if (animals[i] != animalObject){
+                return false;
+            }
+        }
+        // Verifica se HÁ a existência de um animal pacifico no vetor
+        if(animals.length != 0 && !findCarnivoreAnimal){
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Este método tem como objetivo verificar as condições dos MACACOS, o retorno LÓGICO (bool)
+     * da função tem como base o status da condição do objeto referido
+     * @param findCarnivoreAnimal Boolean baseado na presença de um animal carnivoro no recinto
+     * @param animals Array dos animais presentes no recinto a ser verificado
+     * @param quantidade Quantidade de animais a serem adicionados
+     * @return boolean Retorna verdadeiro caso a individualidade do animal seja satisfeita, caso contrário falso.
+    */
+    verifyMonkeyConditionals(findCarnivoreAnimal, animals, quantity){
+        // Verifica se há algum outro animal presente no recinto, e que ele seja obrigatoriamente pacifico;
+        if(findCarnivoreAnimal){
+            return false;
+        }
+        // Verifica se ele não vai ser inserido com algum(ns) companheiro(s);
+        if(quantity >= 2){
+            return true;
+        }
+        // Verifica se NÃO há a presença de outros animais;
+        if(animals.length === 0){
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Este método tem como objetivo verificar as condições dos MACACOS, o retorno LÓGICO (bool)
+     * da função tem como base o status da condição do objeto referido
+     * @param animals Array dos animais presentes no recinto a ser verificado
+     * @param animalArea Objeto(AnimalArea) Recinto de animais para verificar seu bioma
+     * @param findCarnivoreAnimal Boolean baseado na presença de um animal carnivoro no recinto
+     * @return boolean Retorna verdadeiro caso a individualidade do animal seja satisfeita, caso contrário falso.
+    */
+    verifyHippoConditionals(animals, animalArea, findCarnivoreAnimal){
+        let hipopotamoSafeBiome = ["savana", "rio"];
+        // Verifica se há algum outro animal presente no recinto, e que ele seja obrigatoriamente pacifico;
+        if(findCarnivoreAnimal){
+            return false;
+        }
+        // Verifica se o bioma do recinto é compativel com os "safe Biomes" do hipopotamo;
+        let doesBiomesHaveTheSameSize = animalArea.biome.length === hipopotamoSafeBiome.length;
+        
+        if(doesBiomesHaveTheSameSize && animalArea.biome.every(biome => hipopotamoSafeBiome.includes(biome))){
+            return true;
+        }
+        if(animals.length === 0){
+            return true;
+        }
+        if(animals.length > 0){
+            return false;
+        }
+        return false;
     }
 }
 
